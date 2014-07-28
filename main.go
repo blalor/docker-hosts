@@ -21,12 +21,18 @@ func assert(err error) {
 }
 
 func main() {
+	domainName := flag.String("domain-name", "", "domain name to append")
 	flag.Parse()
+
+	hostsFile := flag.Arg(0)
+	if hostsFile == "" {
+		log.Fatal("no hosts file provided")
+	}
 
 	docker, err := dockerapi.NewClient(getopt("DOCKER_HOST", "unix:///var/run/docker.sock"))
 	assert(err)
 
-	hosts := NewHosts(docker, flag.Arg(0))
+	hosts := NewHosts(docker, hostsFile, *domainName)
 
 	// set up to handle events early, so we don't miss anything while doing the
 	// initial population
@@ -52,5 +58,4 @@ func main() {
 	}
 
 	log.Fatal("docker-hosts: docker event loop closed") // todo: reconnect?
-
 }

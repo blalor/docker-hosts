@@ -18,13 +18,15 @@ type Hosts struct {
 	sync.Mutex
 	docker  *dockerapi.Client
 	path    string
+	domain  string
 	entries map[string]HostEntry
 }
 
-func NewHosts(docker *dockerapi.Client, path string) *Hosts {
+func NewHosts(docker *dockerapi.Client, path, domain string) *Hosts {
 	hosts := &Hosts{
 		docker: docker,
 		path:   path,
+		domain: domain,
 	}
 
 	hosts.entries = make(map[string]HostEntry)
@@ -62,6 +64,7 @@ func (h *Hosts) WriteFile() {
 	defer file.Close()
 
 	for _, entry := range h.entries {
+		// <ip>\t<canonical>\t<alias1>\t…\t<aliasN>\n
 		file.WriteString(strings.Join(
 			append(
 				[]string{entry.IPAddress, entry.CanonicalHostname},
@@ -82,11 +85,20 @@ func (h *Hosts) Add(containerId string) {
 		return
 	}
 
-	h.entries[containerId] = HostEntry{
+	entry := HostEntry{
 		IPAddress:         container.NetworkSettings.IPAddress,
 		CanonicalHostname: container.Config.Hostname,
-		// Aliases:           []string{container.Name[1:]}, // could contain "_"
+		Aliases:           []string{
+		// container.Name[1:], // could contain "_"
+		},
 	}
+
+	if h.domain != "" {
+		entry.Aliases =
+			append(h.entries[containerId].Aliases, container.Config.Hostname+"."+h.domain)
+	}
+
+	h.entries[containerId] = entry
 
 	h.WriteFile()
 }
