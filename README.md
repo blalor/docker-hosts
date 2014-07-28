@@ -25,12 +25,15 @@ Optionally specify `DOCKER_HOST` environment variable.
 
 Then start a container:
 
-    docker run -i -t -v /path/to/hosts:/etc/hosts centos /bin/bash
+    docker run -i -t -v /path/to/hosts:/etc/hosts:ro centos /bin/bash
 
 Within the `centos` container, you'll see `/etc/hosts` has an entry for the
 container you just started, as well as any other containers already running.
 `/etc/hosts` will continue to reflect all of the containers currently running on
 this Docker host.
+
+The **only** container that should have write access to the generated hosts file
+is the container running this application.
 
 [gpm]: https://github.com/pote/gpm
 [gvp]: https://github.com/pote/gvp

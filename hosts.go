@@ -2,7 +2,6 @@ package main
 
 import (
 	dockerapi "github.com/fsouza/go-dockerclient"
-	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -67,15 +66,18 @@ func NewHosts(docker *dockerapi.Client, path string) *Hosts {
 	return hosts
 }
 
-func (h *Hosts) WriteFile() error {
-	tempFile, err := ioutil.TempFile(os.TempDir(), "hosts")
+func (h *Hosts) WriteFile() {
+	file, err := os.Create(h.path)
 
 	if err != nil {
-		return err
+		log.Println("unable to write to", h.path, err)
+		return
 	}
 
+	defer file.Close()
+
 	for _, entry := range h.entries {
-		tempFile.WriteString(strings.Join(
+		file.WriteString(strings.Join(
 			append(
 				[]string{entry.IPAddress, entry.CanonicalHostname},
 				entry.Aliases...,
@@ -83,10 +85,6 @@ func (h *Hosts) WriteFile() error {
 			"\t",
 		) + "\n")
 	}
-
-	tempFile.Close() // can't close? ignore!
-
-	return os.Rename(tempFile.Name(), h.path)
 }
 
 func (h *Hosts) Add(containerId string) {
@@ -105,10 +103,7 @@ func (h *Hosts) Add(containerId string) {
 		// Aliases:           []string{container.Name[1:]}, // could contain "_"
 	}
 
-	err = h.WriteFile()
-	if err != nil {
-		log.Println("unable to write file", err)
-	}
+	h.WriteFile()
 }
 
 func (h *Hosts) Remove(containerId string) {
@@ -117,8 +112,5 @@ func (h *Hosts) Remove(containerId string) {
 
 	delete(h.entries, containerId)
 
-	err := h.WriteFile()
-	if err != nil {
-		log.Println("unable to write file", err)
-	}
+	h.WriteFile()
 }
