@@ -1,18 +1,17 @@
 
 ## building
 
-I'm using [gpm][gpm] and [gvp][gvp].
+This project uses [gpm][gpm] and [gvp][gvp].  Both must be available on your
+path.
 
-    gvp init
-    source gvp in
-    gpm install
-    go build ./...
+    make
 
 -- or --
 
     gvp init
-    gvp in gpm install
-    gvp in go build ./...
+    source gvp in
+    gpm install
+    go build -v -o stage/docker-host ./...
 
 ## running
 
