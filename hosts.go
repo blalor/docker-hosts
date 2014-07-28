@@ -43,25 +43,10 @@ func NewHosts(docker *dockerapi.Client, path string) *Hosts {
 	}
 
 	// docker puts these in
-	hosts.entries["fe00::0"] = HostEntry{
-		IPAddress:         "fe00::0",
-		CanonicalHostname: "ip6-localnet",
-	}
-
-	hosts.entries["ff00::0"] = HostEntry{
-		IPAddress:         "ff00::0",
-		CanonicalHostname: "ip6-mcastprefix",
-	}
-
-	hosts.entries["ff02::1"] = HostEntry{
-		IPAddress:         "ff02::1",
-		CanonicalHostname: "ip6-allnodes",
-	}
-
-	hosts.entries["ff02::2"] = HostEntry{
-		IPAddress:         "ff02::2",
-		CanonicalHostname: "ip6-allrouters",
-	}
+	hosts.entries["fe00::0"] = HostEntry{"fe00::0", "ip6-localnet", nil}
+	hosts.entries["ff00::0"] = HostEntry{"ff00::0", "ip6-mcastprefix", nil}
+	hosts.entries["ff02::1"] = HostEntry{"ff02::1", "ip6-allnodes", nil}
+	hosts.entries["ff02::2"] = HostEntry{"ff02::2", "ip6-allrouters", nil}
 
 	return hosts
 }
