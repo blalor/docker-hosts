@@ -34,5 +34,16 @@ this Docker host.
 The **only** container that should have write access to the generated hosts file
 is the container running this application.
 
+## running in Docker
+
+Create an empty file at `/var/lib/docker/hosts` and make it mode `0644` and
+owned by `nobody:nobody`.
+
+    docker run \
+        -d \
+        -v /var/run/docker.sock:/var/run/docker.sock \
+        -v /var/lib/docker/hosts:/srv/hosts \
+        blalor/docker-hosts --domain-name=dev.docker /srv/hosts
+
 [gpm]: https://github.com/pote/gpm
 [gvp]: https://github.com/pote/gvp

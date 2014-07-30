@@ -1,16 +1,18 @@
 package main
 
 import (
-    "flag"
-    dockerapi "github.com/fsouza/go-dockerclient"
-    "log"
     "os"
+    "log"
+    
+    flags "github.com/jessevdk/go-flags"
+    dockerapi "github.com/fsouza/go-dockerclient"
 )
 
 func getopt(name, def string) string {
     if env := os.Getenv(name); env != "" {
         return env
     }
+    
     return def
 }
 
@@ -20,19 +22,25 @@ func assert(err error) {
     }
 }
 
+type Options struct {
+	DomainName string `short:"d" long:"domain-name" description:"domain to append"`
+	File struct {
+		Filename string
+	} `positional-args:"true" required:"true" description:"the hosts file to write"`
+}
+
 func main() {
-    domainName := flag.String("domain-name", "", "domain name to append")
-    flag.Parse()
-
-    hostsFile := flag.Arg(0)
-    if hostsFile == "" {
-        log.Fatal("no hosts file provided")
-    }
-
+	var opts Options
+	
+	_, err := flags.Parse(&opts)
+	if err != nil {
+		os.Exit(1)
+	}
+	
     docker, err := dockerapi.NewClient(getopt("DOCKER_HOST", "unix:///var/run/docker.sock"))
     assert(err)
 
-    hosts := NewHosts(docker, hostsFile, *domainName)
+    hosts := NewHosts(docker, opts.File.Filename, opts.DomainName)
 
     // set up to handle events early, so we don't miss anything while doing the
     // initial population
