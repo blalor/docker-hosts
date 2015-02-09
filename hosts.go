@@ -89,7 +89,7 @@ func (h *Hosts) Add(containerId string) {
         IPAddress:         container.NetworkSettings.IPAddress,
         CanonicalHostname: container.Config.Hostname,
         Aliases:           []string{
-        // container.Name[1:], // could contain "_"
+            strings.Replace(container.Name[1:], "_", "-"), // could contain "_"
         },
     }
 
